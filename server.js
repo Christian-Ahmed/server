@@ -15,34 +15,27 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/db/person', function(request, response) {
-  client.query('SELECT * FROM persons;')
-  .then(function(data) {
-    response.send(data);
-  })
-  .catch(function(err) {
-    console.error(err);
-  });
+app.get('DATABASE_URL', function(request, response) {
+  client.query('SELECT * FROM DATABASE_URL;')
+    .then(function(data) {
+      response.send(data);
+    })
+    .catch(function(err) {
+      console.error(err);
+    });
 });
 
-app.post('/db/person', function(request, response) {
-  client.query(`
-    INSERT INTO persons(name, age, ninja)
-    VALUES($1, $2, $3);
-    `,
-    [
-      request.body.name,
-      request.body.age,
-      request.body.ninja
-    ]
-  )
-  .then(function(data) {
-    response.redirect('/');
+function loadBooks() {
+  fs.readFile('../book-list-client/data/books.json', function(err, fd) {
+    JSON.parse(fd.toString()).forEach(function(ele) {
+      client.query(
+        'INSERT INTO books(title, author, isbn, image_url, description) VALUES($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING',
+        [ele.title, ele.author, ele.isbn, ele.image_url, ele.description]
+      )
+    })
   })
-  .catch(function(err) {
-    console.error(err);
-  });
-});
+}
+
 
 app.listen(PORT, () => {
   console.log('Listening on PORT: ', PORT);

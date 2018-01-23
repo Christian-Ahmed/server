@@ -1,5 +1,3 @@
-import { connect } from 'net';
-
 'use strict';
 
 const cors = require('cors');

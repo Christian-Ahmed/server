@@ -26,6 +26,23 @@ app.get('DATABASE_URL', function(request, response) {
     });
 });
 
+app.post('/books', (req, res) => {
+  client.query(`INSERT INTO books (author, title, img_url, isbn, description) VALUES ($1, $2, $3, $4, $5);`, 
+    [
+      req.body.author,
+      req.body.title,
+      req.body.img_url,
+      req.body.isbn,
+      req.body.description,
+    ])
+    .then(function(data) {
+      res.redirect('/books');
+    })
+    .catch(function(err) {
+      console.error(err)
+    })
+})
+
 function seedBooks() {
   fs.readFile('./book-list-client/data/book.json', function(err, fd) {
     JSON.parse(fd.toString()).forEach(function(ele) {

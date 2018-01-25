@@ -10,6 +10,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const PORT = process.env.PORT || 3000;
 process.env.DATABASE_URL = 'postgres://postgres:1234@localhost:5432/books_app';
+// const conString = 'postgres://localhost:5432/books_app';
 const connectionString = process.env.DATABASE_URL;
 console.log('connectionString: ',connectionString);
 const client = new pg.Client(connectionString);
@@ -32,15 +33,12 @@ app.get('/api/v1/books', (req, res) => {
     .then(result => res.send(result.rows));
 })
 
-// app.get('DATABASE_URL', function(request, response) {
-//   client.query('SELECT * FROM DATABASE_URL;')
-//     .then(function(data) {
-//       response.send(data);
-//     })
-//     .catch(function(err) {
-//       console.error(err);
-//     });
-// });
+app.get('/api/v1/books/:id', (req, res) => {
+  client.query(
+    'SELECT * FROM books WHERE book_id=$1;',
+    [req.params.id])
+    .then(result => res.send(result.rows))
+})
 
 app.post('/books', (req, res) => {
   client.query(`INSERT INTO books (author, title, img_url, isbn, description) VALUES ($1, $2, $3, $4, $5);`, 

@@ -1,6 +1,7 @@
 'use strict';
 
 const cors = require('cors');
+const fs = require('fs');
 const express = require('express');
 const pg = require('pg');
 const bodyParser = require('body-parser');
@@ -25,8 +26,8 @@ app.get('DATABASE_URL', function(request, response) {
     });
 });
 
-function loadBooks() {
-  fs.readFile('../book-list-client/data/books.json', function(err, fd) {
+function seedBooks() {
+  fs.readFile('./book-list-client/data/book.json', function(err, fd) {
     JSON.parse(fd.toString()).forEach(function(ele) {
       client.query(
         'INSERT INTO books(title, author, isbn, image_url, description) VALUES($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING',
@@ -37,6 +38,13 @@ function loadBooks() {
 }
 
 
+app.get('/', (req, res) => {
+  res.send('Test');
+})
+
+
 app.listen(PORT, () => {
   console.log('Listening on PORT: ', PORT);
 })
+
+seedBooks();

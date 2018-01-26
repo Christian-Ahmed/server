@@ -19,28 +19,29 @@ const client = new pg.Client(connectionString);
 client.connect();
 
 app.use(cors());
-app.use(function(req, res, next) {
-  res.header("Acess-Control-Allow_Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// get books
 app.get('/api/v1/books', (req, res) => {
   client.query('SELECT book_id, author, title, img_url FROM books;')
     .then(result => res.send(result.rows));
 })
 
+// get singular book
 app.get('/api/v1/books/:id', (req, res) => {
   client.query(
-    'SELECT * FROM books WHERE book_id=$1;',
-    [req.params.id])
-    .then(result => res.send(result.rows))
+    `SELECT * FROM books WHERE book_id = ${req.params.book_id};`)
+    .then(function(data){
+      res.send(data.rows);
+    })
+    .catch(function(err){
+      console.error(err);
+    })
 })
 
-app.post('/books', (req, res) => {
+// create book record
+app.post('/v1/books', (req, res) => {
   client.query(`INSERT INTO books (author, title, img_url, isbn, description) VALUES ($1, $2, $3, $4, $5);`, 
     [
       req.body.author,
@@ -50,10 +51,47 @@ app.post('/books', (req, res) => {
       req.body.description,
     ])
     .then(function(data) {
-      res.redirect('/books');
+      res.send('Book added');
     })
     .catch(function(err) {
       console.error(err)
+    })
+})
+
+// delete a book record
+app.delete('/v1/books/:book_id', (req, res) => {
+  console.log(req.params.book_id);
+  client.query(`DELETE FROM books WHERE book_id=$1`,
+    [req.params.book_id])
+    .then(() => res.send('Successfully deleted'))
+    .catch(function(err){
+      console.error(err)
+    })
+})
+
+app.put('/v1/books/:book_id', (req, res) => {
+  client.query(`UPdATE * FROM books WHERE book_id = ${req.params.book_id};`)
+    .then(() => {
+      client.query(`
+      UPDATE books
+      SET author=$1, title=$2, isbn=$3, image_url=$4, description=$5
+      WHERE book_id = $6
+      `,
+        [
+          req.body.author,
+          req.body.title,
+          req.body.isbn,
+          req.body.image_url,
+          req.body.description,
+          req.params.book_id
+        ]
+      )
+    })
+    .then(() => {
+      res.send('Update successful')
+    })
+    .catch(function(err){
+      console.error(err);
     })
 })
 

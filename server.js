@@ -20,19 +20,21 @@ client.connect();
 
 app.use(cors());
 app.use(function(req, res, next) {
-  res.header("Acess-Control-Allow_Origin", "*");
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// get books
 app.get('/api/v1/books', (req, res) => {
-  client.query('SELECT book_id, author, title, img_url FROM books;')
+  console.log('getting books')
+  client.query('SELECT book_id, author, title, isbn, description FROM books;')
     .then(result => res.send(result.rows));
 })
 
+<<<<<<< HEAD
 app.get('/v1/books', function(req, res) {
   // console.log('app.get /v1/books');
   client.query('SELECT * FROM books;')
@@ -55,6 +57,21 @@ app.get('/v1/books/:book_id', function (req,res) {
     });
 });
 
+=======
+// get singular book
+app.get('/api/v1/books/:id', (req, res) => {
+  client.query(
+    `SELECT * FROM books WHERE book_id = ${req.params.book_id};`)
+    .then(function(data){
+      res.send(data.rows);
+    })
+    .catch(function(err){
+      console.error(err);
+    })
+})
+
+// create book record
+>>>>>>> 181221aaf54cf28d60f11c0ae6db33ee66b539eb
 app.post('/v1/books', (req, res) => {
   client.query(`INSERT INTO books (author, title, img_url, isbn, description) VALUES ($1, $2, $3, $4, $5);`, 
     [
@@ -65,13 +82,14 @@ app.post('/v1/books', (req, res) => {
       req.body.description,
     ])
     .then(function(data) {
-      res.redirect('/books');
+      res.send('Book added');
     })
     .catch(function(err) {
       console.error(err)
     })
 })
 
+<<<<<<< HEAD
 // DELETE
 app.delete('/v1/books/:book_id', function(req, res) {
   console.log(req.params.book_id);
@@ -85,16 +103,39 @@ app.delete('/v1/books/:book_id', function(req, res) {
 // UPDATE/PUT
 app.put('/v1/books/:book_id/edit', function(req, res) {
   console.log(req.body);
+=======
+// delete a book record
+app.delete('/v1/books/:book_id', (req, res) => {
+  console.log(req.params.book_id);
+  client.query(`DELETE FROM books WHERE book_id=$1`,
+    [req.params.book_id])
+    .then(() => res.send('Successfully deleted'))
+    .catch(function(err){
+      console.error(err)
+    })
+})
+
+app.put('/v1/books/:book_id', (req, res) => {
+>>>>>>> 181221aaf54cf28d60f11c0ae6db33ee66b539eb
   client.query(`UPDATE * FROM books WHERE book_id = ${req.params.book_id};`)
     .then(() => {
       client.query(`
       UPDATE books
+<<<<<<< HEAD
       SET title=$1, author=$2, isbn=$3, image_url=$4, description=$5
       WHERE book_id = $6
       `,
         [
           req.body.title,
           req.body.author,
+=======
+      SET author=$1, title=$2, isbn=$3, image_url=$4, description=$5
+      WHERE book_id = $6
+      `,
+        [
+          req.body.author,
+          req.body.title,
+>>>>>>> 181221aaf54cf28d60f11c0ae6db33ee66b539eb
           req.body.isbn,
           req.body.image_url,
           req.body.description,
@@ -102,6 +143,7 @@ app.put('/v1/books/:book_id/edit', function(req, res) {
         ]
       )
     })
+<<<<<<< HEAD
     .then(() => res.send('Update complete'))
     .catch(console.error);
 });
@@ -124,3 +166,16 @@ function createTable() {
     );`
   )
 }
+=======
+    .then(() => {
+      res.send('Update successful')
+    })
+    .catch(function(err){
+      console.error(err);
+    })
+})
+
+app.listen(PORT, () => {
+  console.log('Listening on PORT: ', PORT);
+}) 
+>>>>>>> 181221aaf54cf28d60f11c0ae6db33ee66b539eb

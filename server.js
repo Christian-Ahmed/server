@@ -19,12 +19,18 @@ const client = new pg.Client(connectionString);
 client.connect();
 
 app.use(cors());
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // get books
 app.get('/api/v1/books', (req, res) => {
-  client.query('SELECT book_id, author, title, img_url FROM books;')
+  console.log('getting books')
+  client.query('SELECT book_id, author, title, isbn, description FROM books;')
     .then(result => res.send(result.rows));
 })
 
@@ -70,7 +76,7 @@ app.delete('/v1/books/:book_id', (req, res) => {
 })
 
 app.put('/v1/books/:book_id', (req, res) => {
-  client.query(`UPdATE * FROM books WHERE book_id = ${req.params.book_id};`)
+  client.query(`UPDATE * FROM books WHERE book_id = ${req.params.book_id};`)
     .then(() => {
       client.query(`
       UPDATE books
@@ -97,4 +103,4 @@ app.put('/v1/books/:book_id', (req, res) => {
 
 app.listen(PORT, () => {
   console.log('Listening on PORT: ', PORT);
-})
+}) 
